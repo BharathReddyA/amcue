@@ -6,6 +6,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
