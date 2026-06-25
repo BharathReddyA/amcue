@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String       @id @default(uuid())
+  email           String       @unique
+  passwordHash    String
+  mockConnections Json         @default("{\"instagram\": false, \"tiktok\": false}")
+  createdAt       DateTime     @default(now())
+  appProjects     AppProject[]
+}
+
+model AppProject {
+  id             String        @id @default(uuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  name           String
+  description    String
+  screenshotUrls String[]      @default([])
+  createdAt      DateTime      @default(now())
+  contentItems   ContentItem[]
+}
+
+model ContentItem {
+  id            String     @id @default(uuid())
+  appProjectId  String
+  appProject    AppProject @relation(fields: [appProjectId], references: [id])
+  caption       String?
+  imagePrompt   String?
+  imageUrl      String?
+  status        String     @default("pending")
+  createdAt     DateTime   @default(now())
+}
