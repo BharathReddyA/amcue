@@ -33,7 +33,9 @@ export default function ProjectsPage() {
       <ul>
         {projects.map((p) => (
           <li key={p.id}>
-            <strong>{p.name}</strong> — {p.description}
+            <a href={`/projects/${p.id}`}>
+              <strong>{p.name}</strong> — {p.description}
+            </a>
           </li>
         ))}
       </ul>
