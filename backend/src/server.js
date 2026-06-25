@@ -9,6 +9,9 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
+const projectRoutes = require('./routes/projects');
+app.use('/projects', projectRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
