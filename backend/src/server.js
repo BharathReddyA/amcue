@@ -1,0 +1,18 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
+
+const PORT = process.env.PORT || 4000;
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`AMcue backend listening on ${PORT}`));
+}
+
+module.exports = app;
