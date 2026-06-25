@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, setToken } from '@/lib/api';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import Card from '@/components/Card';
+import styles from '../auth.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,29 +30,38 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Log in</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Log in</button>
-      </form>
-      {error && <p>{error}</p>}
-      <p>
-        No account? <a href="/register">Register</a>
-      </p>
+    <main className={styles.page}>
+      <Card className={styles.card}>
+        <h1 className={styles.heading}>Log in</h1>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button type="submit">Log in</Button>
+        </form>
+        {error && <p className={styles.error}>{error}</p>}
+        <div className={styles.divider}>or</div>
+        <Button variant="secondary" onClick={() => {}}>
+          Continue with Google
+        </Button>
+        <Button variant="secondary" onClick={() => {}}>
+          Continue with Apple
+        </Button>
+        <p className={styles.switch}>
+          No account? <a href="/register">Register</a>
+        </p>
+      </Card>
     </main>
   );
 }
