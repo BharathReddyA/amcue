@@ -3,6 +3,7 @@ const multer = require('multer');
 const prisma = require('../prismaClient');
 const { requireAuth } = require('../middleware/auth');
 const { uploadImageBuffer } = require('../services/cloudinary');
+const { generateStubContent } = require('../services/ai/stubProvider');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -52,6 +53,47 @@ router.get('/:id', async (req, res) => {
     return res.status(404).json({ error: 'Project not found' });
   }
   res.json(project);
+});
+
+router.post('/:id/generate', async (req, res) => {
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const { caption, imageUrl } = generateStubContent(project);
+  const contentItem = await prisma.contentItem.create({
+    data: {
+      appProjectId: project.id,
+      caption,
+      imageUrl,
+      status: 'pending',
+    },
+  });
+
+  res.status(201).json(contentItem);
+});
+
+router.get('/:id/content', async (req, res) => {
+  const { status } = req.query;
+  if (!status || !['pending', 'approved'].includes(status)) {
+    return res.status(400).json({ error: 'status query param must be "pending" or "approved"' });
+  }
+
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const items = await prisma.contentItem.findMany({
+    where: { appProjectId: project.id, status },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json(items);
 });
 
 module.exports = router;
