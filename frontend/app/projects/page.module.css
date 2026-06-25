@@ -1,0 +1,32 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardLink {
+  display: block;
+}
+
+.cardLink h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.cardLink p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}

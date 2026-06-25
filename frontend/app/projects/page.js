@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiFetch, isLoggedIn, clearToken } from '@/lib/api';
+import { apiFetch, isLoggedIn } from '@/lib/api';
+import Button from '@/components/Button';
+import Card from '@/components/Card';
+import styles from './page.module.css';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -19,27 +22,24 @@ export default function ProjectsPage() {
       .catch((err) => setError(err.message));
   }, [router]);
 
-  function handleLogout() {
-    clearToken();
-    router.push('/login');
-  }
-
   return (
-    <main>
-      <h1>Your app projects</h1>
-      <button onClick={handleLogout}>Log out</button>
-      <a href="/projects/new">+ New project</a>
-      {error && <p>{error}</p>}
-      <ul>
+    <div>
+      <div className={styles.header}>
+        <h1>Your app projects</h1>
+        <Button onClick={() => router.push('/projects/new')}>+ New project</Button>
+      </div>
+      {error && <p className={styles.error}>{error}</p>}
+      <div className={styles.list}>
         {projects.map((p) => (
-          <li key={p.id}>
-            <a href={`/projects/${p.id}`}>
-              <strong>{p.name}</strong> — {p.description}
-            </a>
-          </li>
+          <a key={p.id} href={`/projects/${p.id}`} className={styles.cardLink}>
+            <Card>
+              <h3>{p.name}</h3>
+              <p>{p.description}</p>
+            </Card>
+          </a>
         ))}
-      </ul>
+      </div>
       {projects.length === 0 && !error && <p>No projects yet. Create one!</p>}
-    </main>
+    </div>
   );
 }

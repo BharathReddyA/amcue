@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
+import Button from '@/components/Button';
+import Input from '@/components/Input';
+import Card from '@/components/Card';
+import styles from './page.module.css';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -32,30 +36,33 @@ export default function NewProjectPage() {
   }
 
   return (
-    <main>
+    <div className={styles.page}>
       <h1>New app project</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="App name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <textarea
-          placeholder="Describe your app"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files))}
-        />
-        <button type="submit">Create project</button>
-      </form>
-      {error && <p>{error}</p>}
-    </main>
+      <Card className={styles.card}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <Input
+            placeholder="App name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <textarea
+            className={styles.textarea}
+            placeholder="Describe your app"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setFiles(Array.from(e.target.files))}
+          />
+          <Button type="submit">Create project</Button>
+        </form>
+        {error && <p className={styles.error}>{error}</p>}
+      </Card>
+    </div>
   );
 }
