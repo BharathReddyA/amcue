@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch, isLoggedIn } from '@/lib/api';
+import Card from '@/components/Card';
+import Button from '@/components/Button';
+import TopTabs from '@/components/TopTabs';
+import styles from './page.module.css';
 
 export default function QueuePage() {
   const router = useRouter();
@@ -30,23 +34,27 @@ export default function QueuePage() {
   }
 
   return (
-    <main>
+    <div>
+      <TopTabs projectId={id} active="queue" />
       <h1>Pending review</h1>
-      {error && <p>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
       {items.length === 0 && !error && <p>Nothing pending. Generate some content!</p>}
-      <ul>
+      <div className={styles.list}>
         {items.map((item) => (
-          <li key={item.id}>
+          <Card key={item.id} className={styles.item}>
             <img src={item.imageUrl} alt="Generated" width={120} />
-            <p>{item.caption}</p>
-            <button onClick={() => handleReview(item.id, 'approved')}>Approve</button>
-            <button onClick={() => handleReview(item.id, 'rejected')}>Reject</button>
-          </li>
+            <div className={styles.itemBody}>
+              <p>{item.caption}</p>
+              <div className={styles.actions}>
+                <Button onClick={() => handleReview(item.id, 'approved')}>Approve</Button>
+                <Button variant="secondary" onClick={() => handleReview(item.id, 'rejected')}>
+                  Reject
+                </Button>
+              </div>
+            </div>
+          </Card>
         ))}
-      </ul>
-      <p>
-        <a href={`/projects/${id}`}>Back to project</a>
-      </p>
-    </main>
+      </div>
+    </div>
   );
 }

@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch, isLoggedIn } from '@/lib/api';
+import Card from '@/components/Card';
+import TopTabs from '@/components/TopTabs';
+import styles from './page.module.css';
 
 export default function FeedPage() {
   const router = useRouter();
@@ -21,21 +24,19 @@ export default function FeedPage() {
   }, [id, router]);
 
   return (
-    <main>
+    <div>
+      <TopTabs projectId={id} active="feed" />
       <h1>Approved feed</h1>
-      {error && <p>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
       {items.length === 0 && !error && <p>Nothing approved yet.</p>}
-      <ul>
+      <div className={styles.list}>
         {items.map((item) => (
-          <li key={item.id}>
+          <Card key={item.id} className={styles.item}>
             <img src={item.imageUrl} alt="Approved content" width={120} />
             <p>{item.caption}</p>
-          </li>
+          </Card>
         ))}
-      </ul>
-      <p>
-        <a href={`/projects/${id}`}>Back to project</a>
-      </p>
-    </main>
+      </div>
+    </div>
   );
 }

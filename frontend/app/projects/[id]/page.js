@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { apiFetch, isLoggedIn } from '@/lib/api';
+import Button from '@/components/Button';
+import TopTabs from '@/components/TopTabs';
+import styles from './page.module.css';
 
 export default function ProjectDetailPage() {
   const router = useRouter();
@@ -35,42 +38,28 @@ export default function ProjectDetailPage() {
   }
 
   if (error) {
-    return (
-      <main>
-        <p>{error}</p>
-      </main>
-    );
+    return <p className={styles.error}>{error}</p>;
   }
 
   if (!project) {
-    return (
-      <main>
-        <p>Loading...</p>
-      </main>
-    );
+    return <p>Loading...</p>;
   }
 
   return (
-    <main>
+    <div>
+      <TopTabs projectId={id} active="detail" />
       <h1>{project.name}</h1>
-      <p>{project.description}</p>
+      <p className={styles.description}>{project.description}</p>
       {project.screenshotUrls.length > 0 && (
-        <div>
+        <div className={styles.screenshots}>
           {project.screenshotUrls.map((url) => (
             <img key={url} src={url} alt="Screenshot" width={120} />
           ))}
         </div>
       )}
-      <button onClick={handleGenerate} disabled={generating}>
+      <Button onClick={handleGenerate} disabled={generating}>
         {generating ? 'Generating...' : 'Generate content'}
-      </button>
-      <p>
-        <a href={`/projects/${id}/queue`}>View queue</a>{' '}
-        <a href={`/projects/${id}/feed`}>View feed</a>
-      </p>
-      <p>
-        <a href="/projects">Back to projects</a>
-      </p>
-    </main>
+      </Button>
+    </div>
   );
 }

@@ -1,0 +1,15 @@
+.description {
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+.screenshots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+}
