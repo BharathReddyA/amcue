@@ -26,9 +26,25 @@ export default function ConnectPage() {
       router.push('/login');
       return;
     }
-    apiFetch(`/projects/${id}/connect`)
-      .then(setConnections)
-      .catch((err) => setError(err.message));
+
+    function loadConnections() {
+      apiFetch(`/projects/${id}/connect`)
+        .then(setConnections)
+        .catch((err) => setError(err.message));
+    }
+
+    loadConnections();
+
+    // ponytail: the browser's back/forward cache (bfcache) can restore this
+    // page from a frozen snapshot instead of re-running on mount - refetch
+    // whenever that happens so connection state never looks stale.
+    function handlePageShow(event) {
+      if (event.persisted) {
+        loadConnections();
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, [id, router]);
 
   async function handleToggle(platform) {
