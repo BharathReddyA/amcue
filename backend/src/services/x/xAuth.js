@@ -2,7 +2,7 @@ const crypto = require('crypto');
 
 const AUTHORIZE_URL = 'https://twitter.com/i/oauth2/authorize';
 const TOKEN_URL = 'https://api.x.com/2/oauth2/token';
-const SCOPES = 'tweet.write tweet.read users.read offline.access';
+const SCOPES = 'tweet.write tweet.read users.read media.write offline.access';
 
 // ponytail: in-memory state store is fine for a single-instance deployment
 // with a short-lived OAuth flow - a multi-instance production deployment

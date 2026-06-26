@@ -1,3 +1,11 @@
+const MEDIA_BASE = 'https://api.x.com/2/media/upload';
+
+// ponytail: the v1.1 media/upload.json endpoint this used to call requires
+// OAuth 1.0a and was deprecated by X in June 2025 - this is the real v2
+// three-step flow (initialize -> append -> finalize), which accepts the
+// OAuth 2.0 user-context bearer token this app already has. Single segment
+// only, no chunking/polling - fine for the small images this app generates;
+// add chunking if files larger than a few MB are ever uploaded.
 async function uploadMedia(accessToken, imageUrl) {
   const imageRes = await fetch(imageUrl);
   if (!imageRes.ok) {
@@ -5,22 +13,47 @@ async function uploadMedia(accessToken, imageUrl) {
   }
   const arrayBuffer = await imageRes.arrayBuffer();
   const base64 = Buffer.from(arrayBuffer).toString('base64');
+  const mediaType = imageRes.headers.get('content-type') || 'image/png';
 
-  const res = await fetch('https://upload.twitter.com/1.1/media/upload.json', {
+  const initRes = await fetch(`${MEDIA_BASE}/initialize`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: new URLSearchParams({ media_data: base64 }),
+    body: JSON.stringify({
+      media_type: mediaType,
+      total_bytes: arrayBuffer.byteLength,
+      media_category: 'tweet_image',
+    }),
   });
+  if (!initRes.ok) {
+    throw new Error(`X media upload initialize failed with status ${initRes.status}`);
+  }
+  const { data: initData } = await initRes.json();
+  const mediaId = initData.id;
 
-  if (!res.ok) {
-    throw new Error(`X media upload failed with status ${res.status}`);
+  const appendRes = await fetch(`${MEDIA_BASE}/${mediaId}/append`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ media: base64, segment_index: 0 }),
+  });
+  if (!appendRes.ok) {
+    throw new Error(`X media upload append failed with status ${appendRes.status}`);
   }
 
-  const data = await res.json();
-  return data.media_id_string;
+  const finalizeRes = await fetch(`${MEDIA_BASE}/${mediaId}/finalize`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!finalizeRes.ok) {
+    throw new Error(`X media upload finalize failed with status ${finalizeRes.status}`);
+  }
+
+  return mediaId;
 }
 
 async function postTweet(accessToken, text, mediaId) {
