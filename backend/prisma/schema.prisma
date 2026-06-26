@@ -27,12 +27,22 @@ model AppProject {
 }
 
 model ContentItem {
-  id            String     @id @default(uuid())
+  id            String           @id @default(uuid())
   appProjectId  String
-  appProject    AppProject @relation(fields: [appProjectId], references: [id])
+  appProject    AppProject       @relation(fields: [appProjectId], references: [id])
   caption       String?
   imagePrompt   String?
   imageUrl      String?
-  status        String     @default("pending")
-  createdAt     DateTime   @default(now())
+  status        String           @default("pending")
+  createdAt     DateTime         @default(now())
+  messages      ContentMessage[]
+}
+
+model ContentMessage {
+  id            String      @id @default(uuid())
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id])
+  role          String
+  text          String
+  createdAt     DateTime    @default(now())
 }
