@@ -5,6 +5,7 @@ export default function TopTabs({ projectId, active }) {
     { key: 'detail', label: 'Detail', href: `/projects/${projectId}` },
     { key: 'queue', label: 'Queue', href: `/projects/${projectId}/queue` },
     { key: 'feed', label: 'Feed', href: `/projects/${projectId}/feed` },
+    { key: 'connect', label: 'Connect', href: `/projects/${projectId}/connect` },
   ];
 
   return (
