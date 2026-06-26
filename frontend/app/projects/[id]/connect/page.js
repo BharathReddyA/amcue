@@ -11,6 +11,8 @@ import styles from './page.module.css';
 const PLATFORMS = [
   { key: 'instagram', label: 'Instagram' },
   { key: 'tiktok', label: 'TikTok' },
+  { key: 'youtube', label: 'YouTube' },
+  { key: 'x', label: 'X' },
 ];
 
 export default function ConnectPage() {

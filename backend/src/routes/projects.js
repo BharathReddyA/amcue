@@ -8,6 +8,16 @@ const { generateGeminiContent } = require('../services/ai/geminiProvider');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+const CONNECT_PLATFORMS = ['instagram', 'tiktok', 'youtube', 'x'];
+const DEFAULT_MOCK_CONNECTIONS = { instagram: false, tiktok: false, youtube: false, x: false };
+
+// ponytail: existing users predate the youtube/x platforms, so their stored
+// JSON may be missing those keys - merge over defaults instead of a data
+// migration/backfill.
+function withConnectionDefaults(mockConnections) {
+  return { ...DEFAULT_MOCK_CONNECTIONS, ...mockConnections };
+}
+
 router.use(requireAuth);
 
 router.post('/', upload.array('screenshots', 6), async (req, res) => {
@@ -110,13 +120,13 @@ router.get('/:id/connect', async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.userId } });
-  res.json(user.mockConnections);
+  res.json(withConnectionDefaults(user.mockConnections));
 });
 
 router.post('/:id/connect/:platform', async (req, res) => {
   const { platform } = req.params;
-  if (!['instagram', 'tiktok'].includes(platform)) {
-    return res.status(400).json({ error: 'platform must be "instagram" or "tiktok"' });
+  if (!CONNECT_PLATFORMS.includes(platform)) {
+    return res.status(400).json({ error: `platform must be one of: ${CONNECT_PLATFORMS.join(', ')}` });
   }
 
   const project = await prisma.appProject.findFirst({
@@ -127,9 +137,10 @@ router.post('/:id/connect/:platform', async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  const current = withConnectionDefaults(user.mockConnections);
   const mockConnections = {
-    ...user.mockConnections,
-    [platform]: !user.mockConnections[platform],
+    ...current,
+    [platform]: !current[platform],
   };
 
   const updated = await prisma.user.update({

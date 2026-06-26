@@ -10,7 +10,7 @@ model User {
   id              String       @id @default(uuid())
   email           String       @unique
   passwordHash    String
-  mockConnections Json         @default("{\"instagram\": false, \"tiktok\": false}")
+  mockConnections Json         @default("{\"instagram\": false, \"tiktok\": false, \"youtube\": false, \"x\": false}")
   createdAt       DateTime     @default(now())
   appProjects     AppProject[]
 }

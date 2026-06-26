@@ -28,14 +28,16 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
+const DISCONNECTED = { instagram: false, tiktok: false, youtube: false, x: false };
+
 describe('mock social-connect routes', () => {
-  it('starts disconnected for both platforms', async () => {
+  it('starts disconnected for all platforms', async () => {
     const res = await request(app)
       .get(`/projects/${projectId}/connect`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ instagram: false, tiktok: false });
+    expect(res.body).toEqual(DISCONNECTED);
   });
 
   it('rejects an invalid platform', async () => {
@@ -52,14 +54,36 @@ describe('mock social-connect routes', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(connectRes.status).toBe(200);
-    expect(connectRes.body).toEqual({ instagram: true, tiktok: false });
+    expect(connectRes.body).toEqual({ ...DISCONNECTED, instagram: true });
 
     const disconnectRes = await request(app)
       .post(`/projects/${projectId}/connect/instagram`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(disconnectRes.status).toBe(200);
-    expect(disconnectRes.body).toEqual({ instagram: false, tiktok: false });
+    expect(disconnectRes.body).toEqual(DISCONNECTED);
+  });
+
+  it('toggles youtube and x on independently', async () => {
+    const youtubeRes = await request(app)
+      .post(`/projects/${projectId}/connect/youtube`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(youtubeRes.status).toBe(200);
+    expect(youtubeRes.body).toEqual({ ...DISCONNECTED, youtube: true });
+
+    const xRes = await request(app)
+      .post(`/projects/${projectId}/connect/x`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(xRes.status).toBe(200);
+    expect(xRes.body).toEqual({ ...DISCONNECTED, youtube: true, x: true });
+
+    // reset both for the next test's assumptions
+    await request(app)
+      .post(`/projects/${projectId}/connect/youtube`)
+      .set('Authorization', `Bearer ${token}`);
+    await request(app)
+      .post(`/projects/${projectId}/connect/x`)
+      .set('Authorization', `Bearer ${token}`);
   });
 
   it('GET reflects the current toggled state', async () => {
@@ -72,6 +96,6 @@ describe('mock social-connect routes', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ instagram: false, tiktok: true });
+    expect(res.body).toEqual({ ...DISCONNECTED, tiktok: true });
   });
 });
