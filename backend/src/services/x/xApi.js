@@ -78,4 +78,21 @@ async function postTweet(accessToken, text, mediaId) {
   return { id: tweetId, url: `https://x.com/i/web/status/${tweetId}` };
 }
 
-module.exports = { uploadMedia, postTweet };
+async function fetchRecentTweets(accessToken, userId, maxResults = 10) {
+  const res = await fetch(
+    `https://api.x.com/2/users/${userId}/tweets?max_results=${maxResults}&tweet.fields=created_at`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) {
+    throw new Error(`X timeline fetch failed with status ${res.status}`);
+  }
+  const data = await res.json();
+  return (data.data || []).map((tweet) => ({
+    id: tweet.id,
+    text: tweet.text,
+    url: `https://x.com/i/web/status/${tweet.id}`,
+    createdAt: tweet.created_at,
+  }));
+}
+
+module.exports = { uploadMedia, postTweet, fetchRecentTweets };
