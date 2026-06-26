@@ -43,27 +43,33 @@ Return ONLY raw JSON (no markdown fences, no extra text) in this exact shape: {"
 }
 
 async function generateImageBuffer(imagePrompt) {
-  const res = await fetch(
-    `${API_BASE}/${IMAGE_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: imagePrompt }] }] }),
+  // ponytail: gemini-2.5-flash-image occasionally returns a text-only response
+  // with no image for no deterministic reason (confirmed by re-running an
+  // identical failing prompt 6/6 successfully). One retry is the standard
+  // mitigation for this kind of model flakiness, not a rate-limit backoff.
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const res = await fetch(
+      `${API_BASE}/${IMAGE_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: imagePrompt }] }] }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Gemini image generation failed with status ${res.status}`);
     }
-  );
 
-  if (!res.ok) {
-    throw new Error(`Gemini image generation failed with status ${res.status}`);
+    const data = await res.json();
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const imagePart = parts.find((part) => part.inlineData);
+    if (imagePart) {
+      return Buffer.from(imagePart.inlineData.data, 'base64');
+    }
   }
 
-  const data = await res.json();
-  const parts = data.candidates?.[0]?.content?.parts || [];
-  const imagePart = parts.find((part) => part.inlineData);
-  if (!imagePart) {
-    throw new Error('Gemini image generation returned no image data');
-  }
-
-  return Buffer.from(imagePart.inlineData.data, 'base64');
+  throw new Error('Gemini image generation returned no image data after retry');
 }
 
 async function generateGeminiContent(project) {
@@ -73,4 +79,4 @@ async function generateGeminiContent(project) {
   return { caption, imagePrompt, imageUrl };
 }
 
-module.exports = { generateGeminiContent };
+module.exports = { generateGeminiContent, generateImageBuffer };
