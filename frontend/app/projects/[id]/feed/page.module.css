@@ -15,3 +15,31 @@
   gap: 16px;
   align-items: center;
 }
+
+.postedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.postedBadge {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: var(--color-bg-subtle);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.postControls {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.platformSelect {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 14px;
+}
