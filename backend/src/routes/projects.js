@@ -76,6 +76,7 @@ router.post('/:id/generate', async (req, res) => {
     });
     res.status(201).json(contentItem);
   } catch (err) {
+    console.error('Content generation failed:', err);
     res.status(502).json({ error: 'Content generation failed, please try again' });
   }
 });
