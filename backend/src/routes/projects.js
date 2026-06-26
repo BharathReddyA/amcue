@@ -4,6 +4,7 @@ const prisma = require('../prismaClient');
 const { requireAuth } = require('../middleware/auth');
 const { uploadImageBuffer } = require('../services/cloudinary');
 const { generateGeminiContent } = require('../services/ai/geminiProvider');
+const { getMockAnalytics } = require('../services/mockAnalytics');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -149,6 +150,44 @@ router.post('/:id/connect/:platform', async (req, res) => {
   });
 
   res.json(updated.mockConnections);
+});
+
+router.get('/:id/connect/:platform/analytics', async (req, res) => {
+  const { platform } = req.params;
+  if (!CONNECT_PLATFORMS.includes(platform)) {
+    return res.status(400).json({ error: `platform must be one of: ${CONNECT_PLATFORMS.join(', ')}` });
+  }
+
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const items = await prisma.contentItem.findMany({
+    where: { appProjectId: project.id },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const posts = items.map((item) => ({
+    id: item.id,
+    caption: item.caption,
+    imageUrl: item.imageUrl,
+    status: item.status,
+    ...getMockAnalytics(item.id),
+  }));
+
+  const totals = posts.reduce(
+    (acc, post) => ({
+      views: acc.views + post.views,
+      likes: acc.likes + post.likes,
+      comments: acc.comments + post.comments,
+    }),
+    { views: 0, likes: 0, comments: 0 }
+  );
+
+  res.json({ totals, posts });
 });
 
 module.exports = router;
