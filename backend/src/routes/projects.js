@@ -3,7 +3,7 @@ const multer = require('multer');
 const prisma = require('../prismaClient');
 const { requireAuth } = require('../middleware/auth');
 const { uploadImageBuffer } = require('../services/cloudinary');
-const { generateStubContent } = require('../services/ai/stubProvider');
+const { generateGeminiContent } = require('../services/ai/geminiProvider');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -63,17 +63,21 @@ router.post('/:id/generate', async (req, res) => {
     return res.status(404).json({ error: 'Project not found' });
   }
 
-  const { caption, imageUrl } = generateStubContent(project);
-  const contentItem = await prisma.contentItem.create({
-    data: {
-      appProjectId: project.id,
-      caption,
-      imageUrl,
-      status: 'pending',
-    },
-  });
-
-  res.status(201).json(contentItem);
+  try {
+    const { caption, imagePrompt, imageUrl } = await generateGeminiContent(project);
+    const contentItem = await prisma.contentItem.create({
+      data: {
+        appProjectId: project.id,
+        caption,
+        imagePrompt,
+        imageUrl,
+        status: 'pending',
+      },
+    });
+    res.status(201).json(contentItem);
+  } catch (err) {
+    res.status(502).json({ error: 'Content generation failed, please try again' });
+  }
 });
 
 router.get('/:id/content', async (req, res) => {

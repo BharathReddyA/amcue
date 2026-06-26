@@ -1,6 +1,15 @@
+jest.mock('../src/services/ai/geminiProvider', () => ({
+  generateGeminiContent: jest.fn().mockResolvedValue({
+    caption: 'Mock caption for Content Test App',
+    imagePrompt: 'mock image prompt',
+    imageUrl: 'https://res.cloudinary.com/fake/mock.png',
+  }),
+}));
+
 const request = require('supertest');
 const app = require('../src/server');
 const prisma = require('../src/prismaClient');
+const { generateGeminiContent } = require('../src/services/ai/geminiProvider');
 
 let token;
 let userId;
@@ -22,6 +31,10 @@ beforeAll(async () => {
   projectId = projectRes.body.id;
 });
 
+afterEach(() => {
+  generateGeminiContent.mockClear();
+});
+
 afterAll(async () => {
   await prisma.contentItem.deleteMany({ where: { appProjectId: projectId } });
   await prisma.appProject.deleteMany({ where: { userId } });
@@ -32,15 +45,32 @@ afterAll(async () => {
 });
 
 describe('content generation and review routes', () => {
-  it('generates a pending content item using project name/description', async () => {
+  it('generates a pending content item using the AI provider', async () => {
     const res = await request(app)
       .post(`/projects/${projectId}/generate`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(201);
     expect(res.body.status).toBe('pending');
-    expect(res.body.caption).toContain('Content Test App');
-    expect(res.body.imageUrl).toContain(projectId);
+    expect(res.body.caption).toBe('Mock caption for Content Test App');
+    expect(res.body.imagePrompt).toBe('mock image prompt');
+    expect(res.body.imageUrl).toBe('https://res.cloudinary.com/fake/mock.png');
+  });
+
+  it('returns 502 and creates no content item when the AI provider fails', async () => {
+    generateGeminiContent.mockRejectedValueOnce(new Error('Gemini is down'));
+
+    const before = await prisma.contentItem.count({ where: { appProjectId: projectId } });
+
+    const res = await request(app)
+      .post(`/projects/${projectId}/generate`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(502);
+    expect(res.body.error).toBeDefined();
+
+    const after = await prisma.contentItem.count({ where: { appProjectId: projectId } });
+    expect(after).toBe(before);
   });
 
   it('lists only pending items for the project', async () => {
