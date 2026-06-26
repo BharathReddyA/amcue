@@ -94,7 +94,7 @@ async function exchangeCodeForTokens(code, verifier) {
   return res.json();
 }
 
-async function fetchXUsername(accessToken) {
+async function fetchXProfile(accessToken) {
   const res = await fetch('https://api.x.com/2/users/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
@@ -102,7 +102,7 @@ async function fetchXUsername(accessToken) {
     throw new Error(`X user lookup failed with status ${res.status}`);
   }
   const data = await res.json();
-  return data.data?.username || null;
+  return { id: data.data?.id || null, username: data.data?.username || null };
 }
 
 module.exports = {
@@ -112,5 +112,5 @@ module.exports = {
   consumeTicket,
   buildAuthorizeUrl,
   exchangeCodeForTokens,
-  fetchXUsername,
+  fetchXProfile,
 };

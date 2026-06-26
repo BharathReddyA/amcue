@@ -8,7 +8,7 @@ const {
   consumeTicket,
   buildAuthorizeUrl,
   exchangeCodeForTokens,
-  fetchXUsername,
+  fetchXProfile,
 } = require('../services/x/xAuth');
 
 const router = express.Router();
@@ -46,7 +46,7 @@ router.get('/callback', async (req, res) => {
 
   try {
     const tokens = await exchangeCodeForTokens(code, entry.verifier);
-    const username = await fetchXUsername(tokens.access_token);
+    const profile = await fetchXProfile(tokens.access_token);
 
     await prisma.user.update({
       where: { id: entry.userId },
@@ -54,7 +54,8 @@ router.get('/callback', async (req, res) => {
         xAccessToken: tokens.access_token,
         xRefreshToken: tokens.refresh_token || null,
         xTokenExpiresAt: new Date(Date.now() + tokens.expires_in * 1000),
-        xUsername: username,
+        xUserId: profile.id,
+        xUsername: profile.username,
       },
     });
 
