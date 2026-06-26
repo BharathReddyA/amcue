@@ -13,13 +13,19 @@
 .item {
   display: flex;
   gap: 16px;
+  align-items: center;
 }
 
-.itemBody {
+.clickable {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
   flex: 1;
+  cursor: pointer;
+}
+
+.caption {
+  margin: 0;
 }
 
 .actions {
