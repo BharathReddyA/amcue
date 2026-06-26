@@ -21,3 +21,11 @@
   font-size: 14px;
   margin-top: 4px;
 }
+
+.analyticsLink {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 600;
+}

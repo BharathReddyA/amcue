@@ -53,6 +53,11 @@ export default function ConnectPage() {
               <p className={styles.status}>
                 {connections?.[platform.key] ? 'Connected ✓' : 'Not connected'}
               </p>
+              {connections?.[platform.key] && (
+                <a className={styles.analyticsLink} href={`/projects/${id}/connect/${platform.key}`}>
+                  View analytics
+                </a>
+              )}
             </div>
             <Button
               variant={connections?.[platform.key] ? 'secondary' : 'primary'}
