@@ -56,6 +56,15 @@ export default function ConnectPage() {
     }
   }
 
+  async function handleConnectX() {
+    try {
+      const { ticket } = await apiFetch('/auth/x/prepare', { method: 'POST' });
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/x/login?projectId=${id}&ticket=${ticket}`;
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
     <div>
       <TopTabs projectId={id} active="connect" />
@@ -77,7 +86,11 @@ export default function ConnectPage() {
             </div>
             <Button
               variant={connections?.[platform.key] ? 'secondary' : 'primary'}
-              onClick={() => handleToggle(platform.key)}
+              onClick={() =>
+                platform.key === 'x' && !connections?.x
+                  ? handleConnectX()
+                  : handleToggle(platform.key)
+              }
               disabled={!connections}
             >
               {connections?.[platform.key] ? 'Disconnect' : 'Connect'}

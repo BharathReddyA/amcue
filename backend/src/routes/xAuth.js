@@ -1,9 +1,11 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const prisma = require('../prismaClient');
+const { requireAuth } = require('../middleware/auth');
 const {
   createState,
   consumeState,
+  createTicket,
+  consumeTicket,
   buildAuthorizeUrl,
   exchangeCodeForTokens,
   fetchXUsername,
@@ -11,18 +13,23 @@ const {
 
 const router = express.Router();
 
+// Authenticated normally via the Authorization header. Exchanges the real
+// session JWT for a short-lived, single-use ticket so the real token never
+// has to appear in a URL for the full-page OAuth redirect that follows.
+router.post('/prepare', requireAuth, (req, res) => {
+  const ticket = createTicket(req.userId);
+  res.json({ ticket });
+});
+
 router.get('/login', (req, res) => {
   if (!process.env.X_CLIENT_ID || !process.env.X_CLIENT_SECRET) {
     return res.status(500).json({ error: 'X integration is not configured yet' });
   }
 
-  const { token, projectId } = req.query;
-  let userId;
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    userId = payload.userId;
-  } catch (err) {
-    return res.status(401).send('Your session expired. Please log in again and retry connecting X.');
+  const { ticket, projectId } = req.query;
+  const userId = consumeTicket(ticket);
+  if (!userId) {
+    return res.status(401).send('Your connect link expired. Please try connecting again.');
   }
 
   const { state, challenge } = createState(userId, projectId);

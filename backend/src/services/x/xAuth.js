@@ -35,6 +35,26 @@ function consumeState(state) {
   return entry;
 }
 
+// ponytail: short-lived, single-use ticket so the real session JWT never has
+// to appear in a URL (browser history, server access logs) for the
+// full-page OAuth redirect - same in-memory-Map pattern as pendingStates.
+const pendingTickets = new Map();
+const TICKET_TTL_MS = 60 * 1000;
+
+function createTicket(userId) {
+  const ticket = base64UrlEncode(crypto.randomBytes(16));
+  pendingTickets.set(ticket, { userId, createdAt: Date.now() });
+  return ticket;
+}
+
+function consumeTicket(ticket) {
+  const entry = pendingTickets.get(ticket);
+  if (!entry) return null;
+  pendingTickets.delete(ticket);
+  if (Date.now() - entry.createdAt > TICKET_TTL_MS) return null;
+  return entry.userId;
+}
+
 function buildAuthorizeUrl(state, challenge) {
   const params = new URLSearchParams({
     response_type: 'code',
@@ -88,6 +108,8 @@ async function fetchXUsername(accessToken) {
 module.exports = {
   createState,
   consumeState,
+  createTicket,
+  consumeTicket,
   buildAuthorizeUrl,
   exchangeCodeForTokens,
   fetchXUsername,

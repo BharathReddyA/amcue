@@ -322,6 +322,17 @@ git commit -m "feat: add X media upload and tweet posting service"
 
 ### Task 4: X OAuth routes
 
+> **Amended during implementation:** the original version of this task had `/login`
+> read the real session JWT from a `token` query parameter, which a safety review
+> correctly flagged as credential exposure (a long-lived auth token sitting in browser
+> history / server access logs). The actual implementation instead adds a
+> `POST /prepare` endpoint (authenticated normally via the `Authorization` header) that
+> exchanges the real JWT for a short-lived (60s), single-use ticket; `/login` consumes
+> that ticket instead of a JWT. See Task 7's amendment note for the matching frontend
+> change. The code below reflects the original (superseded) version — the actual
+> shipped code is in `backend/src/routes/xAuth.js` and `backend/src/services/x/xAuth.js`
+> (`createTicket`/`consumeTicket`).
+
 **Files:**
 - Create: `backend/src/routes/xAuth.js`
 - Modify: `backend/src/server.js`
@@ -761,6 +772,15 @@ git commit -m "feat: add post-to-platform routes (real X, mock others)"
 ---
 
 ### Task 7: Connect page — real X login link
+
+> **Amended during implementation:** matching Task 4's amendment, the X button does
+> not build a static `<a href>` with the real JWT in it. Instead, clicking "Connect" on
+> X calls `POST /auth/x/prepare` (via `apiFetch`, so the JWT goes in the
+> `Authorization` header as normal) to get a one-time ticket, then sets
+> `window.location.href` to the login URL with that ticket. The X card keeps using the
+> same `Button` component as every other platform (no separate `xConnectLink` style
+> needed) — the `onClick` handler just branches on whether the platform is X and not
+> yet connected.
 
 **Files:**
 - Modify: `frontend/app/projects/[id]/connect/page.js`
