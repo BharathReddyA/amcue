@@ -121,7 +121,9 @@ router.get('/:id/connect', async (req, res) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id: req.userId } });
-  res.json(withConnectionDefaults(user.mockConnections));
+  const connections = withConnectionDefaults(user.mockConnections);
+  connections.x = Boolean(user.xAccessToken);
+  res.json(connections);
 });
 
 router.post('/:id/connect/:platform', async (req, res) => {
@@ -137,6 +139,20 @@ router.post('/:id/connect/:platform', async (req, res) => {
     return res.status(404).json({ error: 'Project not found' });
   }
 
+  if (platform === 'x') {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user.xAccessToken) {
+      return res.status(400).json({ error: 'X is not connected. Use the Connect link instead.' });
+    }
+    const updated = await prisma.user.update({
+      where: { id: req.userId },
+      data: { xAccessToken: null, xRefreshToken: null, xTokenExpiresAt: null, xUsername: null },
+    });
+    const connections = withConnectionDefaults(updated.mockConnections);
+    connections.x = false;
+    return res.json(connections);
+  }
+
   const user = await prisma.user.findUnique({ where: { id: req.userId } });
   const current = withConnectionDefaults(user.mockConnections);
   const mockConnections = {
@@ -149,7 +165,9 @@ router.post('/:id/connect/:platform', async (req, res) => {
     data: { mockConnections },
   });
 
-  res.json(updated.mockConnections);
+  const connections = withConnectionDefaults(updated.mockConnections);
+  connections.x = Boolean(updated.xAccessToken);
+  res.json(connections);
 });
 
 router.get('/:id/connect/:platform/analytics', async (req, res) => {
