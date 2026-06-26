@@ -101,4 +101,43 @@ router.get('/:id/content', async (req, res) => {
   res.json(items);
 });
 
+router.get('/:id/connect', async (req, res) => {
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  res.json(user.mockConnections);
+});
+
+router.post('/:id/connect/:platform', async (req, res) => {
+  const { platform } = req.params;
+  if (!['instagram', 'tiktok'].includes(platform)) {
+    return res.status(400).json({ error: 'platform must be "instagram" or "tiktok"' });
+  }
+
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  const mockConnections = {
+    ...user.mockConnections,
+    [platform]: !user.mockConnections[platform],
+  };
+
+  const updated = await prisma.user.update({
+    where: { id: req.userId },
+    data: { mockConnections },
+  });
+
+  res.json(updated.mockConnections);
+});
+
 module.exports = router;
