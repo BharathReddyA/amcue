@@ -15,6 +15,9 @@ app.use('/projects', projectRoutes);
 const contentRoutes = require('./routes/content');
 app.use('/content', contentRoutes);
 
+const xAuthRoutes = require('./routes/xAuth');
+app.use('/auth/x', xAuthRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
