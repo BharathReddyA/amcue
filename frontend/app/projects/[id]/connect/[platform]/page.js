@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiFetch, isLoggedIn } from '@/lib/api';
 import Card from '@/components/Card';
+import Button from '@/components/Button';
 import TopTabs from '@/components/TopTabs';
 import styles from './page.module.css';
 
@@ -12,6 +13,7 @@ export default function PlatformAnalyticsPage() {
   const { id, platform } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -22,6 +24,17 @@ export default function PlatformAnalyticsPage() {
       .then(setData)
       .catch((err) => setError(err.message));
   }, [id, platform, router]);
+
+  async function handleDisconnect() {
+    setDisconnecting(true);
+    try {
+      await apiFetch(`/projects/${id}/connect/${platform}`, { method: 'POST' });
+      router.push(`/projects/${id}/connect`);
+    } catch (err) {
+      setError(err.message);
+      setDisconnecting(false);
+    }
+  }
 
   if (error) {
     return <p className={styles.error}>{error}</p>;
@@ -35,6 +48,22 @@ export default function PlatformAnalyticsPage() {
     <div>
       <TopTabs projectId={id} active="connect" />
       <h1>{platform.charAt(0).toUpperCase() + platform.slice(1)} analytics</h1>
+      {data.account && (
+        <Card className={styles.accountCard}>
+          <div>
+            <p className={styles.accountLabel}>Connected as</p>
+            <p className={styles.accountUsername}>@{data.account.username}</p>
+          </div>
+          <div className={styles.accountActions}>
+            <a href={data.account.profileUrl} target="_blank" rel="noreferrer">
+              View profile
+            </a>
+            <Button variant="secondary" onClick={handleDisconnect} disabled={disconnecting}>
+              {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+            </Button>
+          </div>
+        </Card>
+      )}
       <div className={styles.totals}>
         <Card className={styles.totalCard}>
           <p className={styles.totalLabel}>Views</p>
@@ -62,6 +91,21 @@ export default function PlatformAnalyticsPage() {
           </Card>
         ))}
       </div>
+      {data.timeline.length > 0 && (
+        <div className={styles.timelineSection}>
+          <h2>Recent posts</h2>
+          <div className={styles.list}>
+            {data.timeline.map((tweet) => (
+              <Card key={tweet.id} className={styles.timelineItem}>
+                <p>{tweet.text}</p>
+                <a href={tweet.url} target="_blank" rel="noreferrer">
+                  View ↗
+                </a>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

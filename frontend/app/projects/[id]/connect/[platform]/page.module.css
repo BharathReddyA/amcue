@@ -49,3 +49,54 @@
   color: var(--color-text-muted);
   font-size: 13px;
 }
+
+.accountCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.accountLabel {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.accountUsername {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.accountActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.accountActions a {
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.timelineSection {
+  margin-top: 32px;
+}
+
+.timelineSection h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.timelineItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timelineItem a {
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 600;
+  align-self: flex-start;
+}
