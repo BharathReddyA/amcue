@@ -64,26 +64,46 @@ describe('mock social-connect routes', () => {
     expect(disconnectRes.body).toEqual(DISCONNECTED);
   });
 
-  it('toggles youtube and x on independently', async () => {
+  it('toggles youtube on, then off again', async () => {
     const youtubeRes = await request(app)
       .post(`/projects/${projectId}/connect/youtube`)
       .set('Authorization', `Bearer ${token}`);
     expect(youtubeRes.status).toBe(200);
     expect(youtubeRes.body).toEqual({ ...DISCONNECTED, youtube: true });
 
-    const xRes = await request(app)
-      .post(`/projects/${projectId}/connect/x`)
-      .set('Authorization', `Bearer ${token}`);
-    expect(xRes.status).toBe(200);
-    expect(xRes.body).toEqual({ ...DISCONNECTED, youtube: true, x: true });
-
-    // reset both for the next test's assumptions
+    // reset for the next test's assumptions
     await request(app)
       .post(`/projects/${projectId}/connect/youtube`)
       .set('Authorization', `Bearer ${token}`);
-    await request(app)
+  });
+
+  it('rejects toggling x via the mock route when not really connected', async () => {
+    const res = await request(app)
       .post(`/projects/${projectId}/connect/x`)
       .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('disconnects x by clearing real OAuth tokens', async () => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { xAccessToken: 'fake-token', xUsername: 'faketestuser' },
+    });
+
+    const getRes = await request(app)
+      .get(`/projects/${projectId}/connect`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(getRes.body.x).toBe(true);
+
+    const disconnectRes = await request(app)
+      .post(`/projects/${projectId}/connect/x`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(disconnectRes.status).toBe(200);
+    expect(disconnectRes.body.x).toBe(false);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    expect(user.xAccessToken).toBeNull();
   });
 
   it('GET reflects the current toggled state', async () => {
