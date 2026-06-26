@@ -1,46 +1,78 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(8, 9, 18, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
+  padding: 16px;
+  animation: fade 0.18s ease;
 }
 
 .panel {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   width: 480px;
-  max-height: 80vh;
+  max-width: 100%;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 22px;
   position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
 }
 
 .close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--color-bg-subtle);
   border: none;
-  font-size: 20px;
+  font-size: 18px;
+  line-height: 1;
   cursor: pointer;
   color: var(--color-text-muted);
+}
+
+.close:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
 }
 
 .image {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border);
 }
 
 .caption {
   font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  color: var(--color-text);
 }
 
 .thread {
@@ -49,31 +81,32 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   min-height: 100px;
 }
 
 .userMsg {
   align-self: flex-end;
-  background: var(--color-accent);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 12px;
+  background: var(--gradient-accent);
+  color: var(--color-on-accent);
+  padding: 9px 13px;
+  border-radius: 14px 14px 4px 14px;
   font-size: 13px;
-  max-width: 80%;
+  max-width: 82%;
 }
 
 .assistantMsg {
   align-self: flex-start;
   background: var(--color-bg-subtle);
-  padding: 8px 12px;
-  border-radius: 12px;
+  color: var(--color-text);
+  padding: 9px 13px;
+  border-radius: 14px 14px 14px 4px;
   font-size: 13px;
-  max-width: 80%;
+  max-width: 82%;
 }
 
 .error {
-  color: #dc2626;
+  color: var(--color-danger);
   font-size: 13px;
 }
 

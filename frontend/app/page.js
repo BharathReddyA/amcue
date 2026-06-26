@@ -4,27 +4,52 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn } from '@/lib/api';
 import Button from '@/components/Button';
+import ThemeToggle from '@/components/ThemeToggle';
 import styles from './page.module.css';
 
 const FEATURES = [
-  { title: 'Describe your app', body: 'Tell AMcue about your app and upload a few screenshots.' },
-  { title: 'AI generates content', body: 'Get a caption and image generated on a recurring basis.' },
-  { title: 'Review & approve', body: 'Approve or reject each piece before it goes live.' },
-  { title: "It's in your feed", body: 'Approved content lands in your in-app feed, ready to use.' },
+  {
+    title: 'Describe your app',
+    body: 'Tell AMcue about your app and upload a few screenshots — that becomes its context.',
+    icon: (
+      <path d="M4 5h16M4 12h16M4 19h10" />
+    ),
+  },
+  {
+    title: 'AI generates content',
+    body: 'Gemini writes the caption and generates a matching image, on demand.',
+    icon: (
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+    ),
+  },
+  {
+    title: 'Review & refine',
+    body: 'Approve, reject, or chat with the editor to tweak the caption or image.',
+    icon: (
+      <path d="M20 6L9 17l-5-5" />
+    ),
+  },
+  {
+    title: 'Publish for real',
+    body: 'Post approved content straight to X — with more platforms on the way.',
+    icon: (
+      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+    ),
+  },
 ];
 
 const FAQS = [
   {
     q: 'Does this post to my real social accounts?',
-    a: 'Not yet — AMcue currently shows approved content in your own feed; direct publishing is a future feature.',
+    a: 'Yes — connect your X account and AMcue publishes approved posts to it. Instagram, TikTok, and YouTube are coming next.',
   },
   {
     q: 'What AI does AMcue use?',
-    a: 'Caption and image generation are being wired up now — today the queue shows placeholder content so you can try the full flow.',
+    a: 'Google Gemini generates both the marketing caption and a matching promotional image for each piece of content.',
   },
   {
-    q: 'Is my data private?',
-    a: 'This is an internal practice project — only your own account can see your projects and content.',
+    q: 'Do I stay in control of what goes out?',
+    a: 'Always. Nothing is published until you approve it — and you can chat with the editor to refine any post first.',
   },
 ];
 
@@ -46,42 +71,92 @@ export default function LandingPage() {
 
   return (
     <main className={styles.page}>
+      <header className={styles.nav}>
+        <a href="/" className={styles.brand}>
+          <span className={styles.brandMark}>A</span>
+          <span>AMcue</span>
+        </a>
+        <div className={styles.navActions}>
+          <ThemeToggle />
+          <button className={styles.navLogin} onClick={() => router.push('/login')}>
+            Log in
+          </button>
+          <Button onClick={() => router.push('/register')}>Get started</Button>
+        </div>
+      </header>
+
       <section className={styles.hero}>
-        <div className={styles.logo}>AMcue</div>
-        <h1 className={styles.tagline}>Automate your indie app&apos;s marketing</h1>
+        <span className={styles.badge}>AI-powered marketing for indie apps</span>
+        <h1 className={styles.tagline}>
+          Automate your app&apos;s marketing,
+          <span className={styles.gradientText}> end to end.</span>
+        </h1>
+        <p className={styles.subtitle}>
+          Describe your app once. AMcue generates captions and images, lets you review and
+          refine them, then publishes the winners — so growth runs while you build.
+        </p>
         <div className={styles.heroActions}>
-          <Button onClick={() => router.push('/login')}>Log in</Button>
-          <Button variant="secondary" onClick={() => router.push('/register')}>
-            Sign up
+          <Button onClick={() => router.push('/register')}>Start free</Button>
+          <Button variant="secondary" onClick={() => router.push('/login')}>
+            Log in
           </Button>
+        </div>
+      </section>
+
+      <section className={styles.preview}>
+        <div className={styles.previewPanel}>
+          <div className={styles.previewBar}>
+            <span />
+            <span />
+            <span />
+          </div>
+          <div className={styles.previewBody}>
+            <div className={styles.previewSidebar} />
+            <div className={styles.previewMain}>
+              <div className={styles.previewCardRow}>
+                <div className={styles.previewCard} />
+                <div className={styles.previewCard} />
+                <div className={styles.previewCard} />
+              </div>
+              <div className={styles.previewWide} />
+              <div className={styles.previewWide} />
+            </div>
+          </div>
         </div>
       </section>
 
       <section className={styles.features}>
         {FEATURES.map((f) => (
           <div key={f.title} className={styles.feature}>
+            <span className={styles.featureIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {f.icon}
+              </svg>
+            </span>
             <h3>{f.title}</h3>
             <p>{f.body}</p>
           </div>
         ))}
       </section>
 
-      <section className={styles.preview}>
-        <div className={styles.previewPanel}>Product preview coming soon</div>
-      </section>
-
       <section className={styles.faq}>
-        <h2>FAQ</h2>
-        {FAQS.map((item) => (
-          <div key={item.q} className={styles.faqItem}>
-            <h4>{item.q}</h4>
-            <p>{item.a}</p>
-          </div>
-        ))}
+        <h2>Frequently asked</h2>
+        <div className={styles.faqList}>
+          {FAQS.map((item) => (
+            <div key={item.q} className={styles.faqItem}>
+              <h4>{item.q}</h4>
+              <p>{item.a}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} AMcue. Practice project, not a real product.</p>
+        <div className={styles.brand}>
+          <span className={styles.brandMark}>A</span>
+          <span>AMcue</span>
+        </div>
+        <p>&copy; {new Date().getFullYear()} AMcue. Built for indie makers.</p>
       </footer>
     </main>
   );

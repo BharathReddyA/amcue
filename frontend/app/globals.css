@@ -1,13 +1,73 @@
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a2e;
-  --color-accent: #4f46e5;
-  --color-accent-hover: #4338ca;
-  --color-text: #1a1a2e;
-  --color-text-muted: #6b7280;
-  --color-border: #e5e7eb;
-  --color-bg-subtle: #f9fafb;
-  --radius: 8px;
+  /* Brand */
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-on-accent: #ffffff;
+  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-hero: radial-gradient(
+      1200px 600px at 50% -10%,
+      rgba(99, 102, 241, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at 85% 10%, rgba(139, 92, 246, 0.14), transparent 55%);
+
+  /* Surfaces */
+  --background: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f2f9;
+  --color-bg-subtle: #eef0f7;
+
+  /* Text */
+  --foreground: #0f1222;
+  --color-text: #0f1222;
+  --color-text-muted: #5b6178;
+
+  /* Lines + states */
+  --color-border: #e7e9f2;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(16, 18, 34, 0.06);
+  --shadow-md: 0 6px 24px rgba(16, 18, 34, 0.08);
+  --shadow-lg: 0 18px 50px rgba(16, 18, 34, 0.14);
+  --shadow-glow: 0 10px 30px rgba(99, 102, 241, 0.35);
+}
+
+[data-theme='dark'] {
+  --color-accent: #818cf8;
+  --color-accent-hover: #6366f1;
+  --color-on-accent: #0b0c16;
+  --gradient-accent: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --gradient-hero: radial-gradient(
+      1200px 600px at 50% -10%,
+      rgba(129, 140, 248, 0.22),
+      transparent 60%
+    ),
+    radial-gradient(900px 500px at 85% 10%, rgba(167, 139, 250, 0.16), transparent 55%);
+
+  --background: #0a0b14;
+  --color-surface: #13141f;
+  --color-surface-2: #1a1c2b;
+  --color-bg-subtle: #1a1c2b;
+
+  --foreground: #f3f4fb;
+  --color-text: #f3f4fb;
+  --color-text-muted: #9aa0b8;
+
+  --color-border: #262838;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 10px 30px rgba(129, 140, 248, 0.3);
 }
 
 html {
@@ -26,7 +86,7 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,7 +97,35 @@ body {
   margin: 0;
 }
 
+/* Smooth theme transition on themed surfaces */
+body,
+button,
+input,
+textarea,
+select,
+nav {
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease,
+    color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.25);
 }

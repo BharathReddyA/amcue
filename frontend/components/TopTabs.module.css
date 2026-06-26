@@ -1,20 +1,30 @@
 .tabs {
-  display: flex;
+  display: inline-flex;
   gap: 4px;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  margin-bottom: 24px;
 }
 
 .tab,
 .activeTab {
-  padding: 10px 16px;
+  padding: 8px 18px;
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text-muted);
-  border-bottom: 2px solid transparent;
+  border-radius: 999px;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tab:hover {
+  color: var(--color-text);
 }
 
 .activeTab {
   color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
+  background: var(--color-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
 }

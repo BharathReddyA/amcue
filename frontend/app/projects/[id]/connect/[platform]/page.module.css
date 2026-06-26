@@ -1,12 +1,12 @@
 .error {
-  color: #dc2626;
+  color: var(--color-danger);
   font-size: 13px;
 }
 
 .totals {
   display: flex;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 16px;
+  margin: 20px 0;
 }
 
 .totalCard {
@@ -17,12 +17,19 @@
 .totalLabel {
   color: var(--color-text-muted);
   font-size: 13px;
-  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
 }
 
 .totalValue {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 800;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .list {

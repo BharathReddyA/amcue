@@ -6,6 +6,7 @@ import { apiFetch, setToken } from '@/lib/api';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Card from '@/components/Card';
+import ThemeToggle from '@/components/ThemeToggle';
 import styles from '../auth.module.css';
 
 export default function LoginPage() {
@@ -31,8 +32,16 @@ export default function LoginPage() {
 
   return (
     <main className={styles.page}>
+      <div className={styles.themeToggle}>
+        <ThemeToggle />
+      </div>
       <Card className={styles.card}>
-        <h1 className={styles.heading}>Log in</h1>
+        <div className={styles.brand}>
+          <span className={styles.brandMark}>A</span>
+          <span className={styles.brandName}>AMcue</span>
+        </div>
+        <h1 className={styles.heading}>Welcome back</h1>
+        <p className={styles.subheading}>Log in to keep your marketing on autopilot.</p>
         <form className={styles.form} onSubmit={handleSubmit}>
           <Input
             type="email"

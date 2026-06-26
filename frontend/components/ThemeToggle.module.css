@@ -1,0 +1,23 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle svg {
+  display: block;
+}
