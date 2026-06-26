@@ -14,6 +14,7 @@ model User {
   xAccessToken    String?
   xRefreshToken   String?
   xTokenExpiresAt DateTime?
+  xUserId         String?
   xUsername       String?
   createdAt       DateTime     @default(now())
   appProjects     AppProject[]
