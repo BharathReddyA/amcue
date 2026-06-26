@@ -5,12 +5,27 @@ const { requireAuth } = require('../middleware/auth');
 const { uploadImageBuffer } = require('../services/cloudinary');
 const { generateGeminiContent } = require('../services/ai/geminiProvider');
 const { getMockAnalytics } = require('../services/mockAnalytics');
+const { fetchRecentTweets } = require('../services/x/xApi');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const CONNECT_PLATFORMS = ['instagram', 'tiktok', 'youtube', 'x'];
 const DEFAULT_MOCK_CONNECTIONS = { instagram: false, tiktok: false, youtube: false, x: false };
+const MOCK_TIMELINE = [
+  {
+    id: 'mock-1',
+    text: 'Just launched a new feature — check it out!',
+    url: '#',
+    createdAt: null,
+  },
+  {
+    id: 'mock-2',
+    text: 'Behind the scenes of our latest update.',
+    url: '#',
+    createdAt: null,
+  },
+];
 
 // ponytail: existing users predate the youtube/x platforms, so their stored
 // JSON may be missing those keys - merge over defaults instead of a data
@@ -205,7 +220,26 @@ router.get('/:id/connect/:platform/analytics', async (req, res) => {
     { views: 0, likes: 0, comments: 0 }
   );
 
-  res.json({ totals, posts });
+  let account = null;
+  let timeline = [];
+
+  if (platform === 'x') {
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (user.xAccessToken) {
+      account = { username: user.xUsername, profileUrl: `https://x.com/${user.xUsername}` };
+      try {
+        timeline = await fetchRecentTweets(user.xAccessToken, user.xUserId, 10);
+      } catch (err) {
+        console.error('X timeline fetch failed:', err);
+        timeline = [];
+      }
+    }
+  } else {
+    account = { username: `demo_${platform}_user`, profileUrl: '#' };
+    timeline = MOCK_TIMELINE;
+  }
+
+  res.json({ totals, posts, account, timeline });
 });
 
 module.exports = router;
