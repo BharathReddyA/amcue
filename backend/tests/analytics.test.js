@@ -37,6 +37,14 @@ beforeAll(async () => {
       status: 'approved',
     },
   });
+  await prisma.contentItem.create({
+    data: {
+      appProjectId: projectId,
+      caption: 'Post three (rejected)',
+      imageUrl: 'https://res.cloudinary.com/fake/three.png',
+      status: 'rejected',
+    },
+  });
 });
 
 afterAll(async () => {
@@ -89,6 +97,16 @@ describe('platform analytics route', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(400);
+  });
+
+  it('excludes rejected items', async () => {
+    const res = await request(app)
+      .get(`/projects/${projectId}/connect/instagram/analytics`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.posts.length).toBe(2);
+    expect(res.body.posts.some((p) => p.status === 'rejected')).toBe(false);
   });
 
   it('returns 404 for a project owned by another user', async () => {

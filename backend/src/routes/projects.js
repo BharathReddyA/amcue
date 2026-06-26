@@ -166,7 +166,7 @@ router.get('/:id/connect/:platform/analytics', async (req, res) => {
   }
 
   const items = await prisma.contentItem.findMany({
-    where: { appProjectId: project.id },
+    where: { appProjectId: project.id, status: { not: 'rejected' } },
     orderBy: { createdAt: 'desc' },
   });
 
