@@ -3,7 +3,9 @@ const app = require('../src/server');
 const prisma = require('../src/prismaClient');
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { email: 'test@amcue.dev' } });
+  await prisma.user.deleteMany({
+    where: { email: { in: ['test@amcue.dev', 'casetest@amcue.dev'] } },
+  });
   await prisma.$disconnect();
 });
 
@@ -32,5 +34,18 @@ describe('auth routes', () => {
       .send({ email: 'test@amcue.dev', password: 'wrongpassword' });
 
     expect(res.status).toBe(401);
+  });
+
+  it('treats email as case-insensitive (registers lowercase, logs in with mixed case)', async () => {
+    const registerRes = await request(app)
+      .post('/auth/register')
+      .send({ email: 'CaseTest@AMcue.dev', password: 'password123' });
+    expect(registerRes.status).toBe(201);
+
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ email: '  CASETEST@amcue.DEV  ', password: 'password123' });
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.token).toBeDefined();
   });
 });
