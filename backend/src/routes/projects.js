@@ -244,4 +244,46 @@ router.get('/:id/connect/:platform/analytics', async (req, res) => {
   res.json({ totals, posts, account, timeline });
 });
 
+router.get('/:id/brand-voice', async (req, res) => {
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const counts = await countVoiceSignals(project.id);
+  res.json({
+    summary: project.brandVoiceSummary,
+    counts: { approved: counts.approved, rejected: counts.rejected, edits: counts.edits },
+    stale: counts.total !== project.brandVoiceSignals,
+  });
+});
+
+router.post('/:id/brand-voice/refresh', async (req, res) => {
+  const project = await prisma.appProject.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  try {
+    const summary = await distillVoice(project.id);
+    const counts = await countVoiceSignals(project.id);
+    await prisma.appProject.update({
+      where: { id: project.id },
+      data: { brandVoiceSummary: summary, brandVoiceSignals: counts.total },
+    });
+    res.json({
+      summary,
+      counts: { approved: counts.approved, rejected: counts.rejected, edits: counts.edits },
+      stale: false,
+    });
+  } catch (err) {
+    console.error('Brand voice refresh failed:', err);
+    res.status(502).json({ error: 'Brand voice refresh failed, please try again' });
+  }
+});
+
 module.exports = router;
