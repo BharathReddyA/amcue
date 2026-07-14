@@ -21,14 +21,16 @@ model User {
 }
 
 model AppProject {
-  id             String        @id @default(uuid())
-  userId         String
-  user           User          @relation(fields: [userId], references: [id])
-  name           String
-  description    String
-  screenshotUrls String[]      @default([])
-  createdAt      DateTime      @default(now())
-  contentItems   ContentItem[]
+  id                String        @id @default(uuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+  name              String
+  description       String
+  screenshotUrls    String[]      @default([])
+  brandVoiceSummary String?
+  brandVoiceSignals Int           @default(0)
+  createdAt         DateTime      @default(now())
+  contentItems      ContentItem[]
 }
 
 model ContentItem {
