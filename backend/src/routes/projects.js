@@ -4,6 +4,7 @@ const prisma = require('../prismaClient');
 const { requireAuth } = require('../middleware/auth');
 const { uploadImageBuffer } = require('../services/cloudinary');
 const { generateGeminiContent } = require('../services/ai/geminiProvider');
+const { getVoiceContext, countVoiceSignals, distillVoice } = require('../services/ai/brandVoice');
 const { getMockAnalytics } = require('../services/mockAnalytics');
 const { fetchRecentTweets } = require('../services/x/xApi');
 
@@ -90,7 +91,8 @@ router.post('/:id/generate', async (req, res) => {
   }
 
   try {
-    const { caption, imagePrompt, imageUrl } = await generateGeminiContent(project);
+    const voice = await getVoiceContext(project.id);
+    const { caption, imagePrompt, imageUrl } = await generateGeminiContent(project, voice);
     const contentItem = await prisma.contentItem.create({
       data: {
         appProjectId: project.id,

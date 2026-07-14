@@ -4,11 +4,42 @@ const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const TEXT_MODEL = 'gemini-2.5-flash';
 const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
-async function generateCaptionAndPrompt(project) {
+function buildVoiceSection(voice) {
+  if (!voice) return '';
+  const parts = [];
+  if (voice.summary) {
+    parts.push(`Brand voice summary: ${voice.summary}`);
+  }
+  if (voice.approved?.length) {
+    parts.push(
+      `Match the style, tone, and voice of these captions the user approved:\n${voice.approved
+        .map((c) => `- ${c}`)
+        .join('\n')}`
+    );
+  }
+  if (voice.rejected?.length) {
+    parts.push(
+      `Avoid the style and content patterns of these captions the user rejected:\n${voice.rejected
+        .map((c) => `- ${c}`)
+        .join('\n')}`
+    );
+  }
+  if (voice.edits?.length) {
+    parts.push(
+      `The user has given these standing preferences when editing content - respect them:\n${voice.edits
+        .map((e) => `- ${e}`)
+        .join('\n')}`
+    );
+  }
+  if (parts.length === 0) return '';
+  return `\n\nBRAND VOICE (learned from this user's editorial history):\n${parts.join('\n\n')}`;
+}
+
+async function generateCaptionAndPrompt(project, voice) {
   const prompt = `You are a marketing assistant for an indie app called "${project.name}". App description: "${project.description}".
 Return ONLY raw JSON (no markdown fences, no extra text) in this exact shape: {"caption": "...", "imagePrompt": "..."}.
 "caption" is a short, friendly social media caption promoting the app (max 2 sentences, can include relevant emoji).
-"imagePrompt" is a vivid, detailed prompt for an AI image generator to create a promotional image for this app (describe subject, style, and mood; do not request any text or words to appear in the image).`;
+"imagePrompt" is a vivid, detailed prompt for an AI image generator to create a promotional image for this app (describe subject, style, and mood; do not request any text or words to appear in the image).${buildVoiceSection(voice)}`;
 
   const res = await fetch(
     `${API_BASE}/${TEXT_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -72,8 +103,8 @@ async function generateImageBuffer(imagePrompt) {
   throw new Error('Gemini image generation returned no image data after retry');
 }
 
-async function generateGeminiContent(project) {
-  const { caption, imagePrompt } = await generateCaptionAndPrompt(project);
+async function generateGeminiContent(project, voice = null) {
+  const { caption, imagePrompt } = await generateCaptionAndPrompt(project, voice);
   const imageBuffer = await generateImageBuffer(imagePrompt);
   const imageUrl = await uploadImageBuffer(imageBuffer, 'amcue/generated');
   return { caption, imagePrompt, imageUrl };

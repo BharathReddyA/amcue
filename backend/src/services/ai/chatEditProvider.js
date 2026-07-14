@@ -4,13 +4,15 @@ const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const TEXT_MODEL = 'gemini-2.5-flash';
 const IMAGE_MODEL = 'gemini-2.5-flash-image';
 
-async function decideChatAction({ caption, imagePrompt, history, userText }) {
+async function decideChatAction({ caption, imagePrompt, history, userText, voiceSummary }) {
   const historyText = history
     .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`)
     .join('\n');
 
-  const prompt = `You are an assistant helping someone refine a piece of marketing content before they approve it.
+  const voiceLine = voiceSummary ? `\nBrand voice to respect: ${voiceSummary}\n` : '';
 
+  const prompt = `You are an assistant helping someone refine a piece of marketing content before they approve it.
+${voiceLine}
 Current caption: "${caption}"
 Current image description: "${imagePrompt}"
 
@@ -102,12 +104,13 @@ async function editImage(currentImageUrl, instruction) {
   throw new Error('Gemini image edit returned no image data after retry');
 }
 
-async function applyChatMessage({ contentItem, history, userText }) {
+async function applyChatMessage({ contentItem, history, userText, voiceSummary }) {
   const decision = await decideChatAction({
     caption: contentItem.caption,
     imagePrompt: contentItem.imagePrompt,
     history,
     userText,
+    voiceSummary,
   });
 
   const updates = {};

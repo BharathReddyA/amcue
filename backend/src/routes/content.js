@@ -51,6 +51,7 @@ router.post('/:id/messages', async (req, res) => {
 
   const item = await prisma.contentItem.findFirst({
     where: { id: req.params.id, appProject: { userId: req.userId } },
+    include: { appProject: { select: { brandVoiceSummary: true } } },
   });
   if (!item) {
     return res.status(404).json({ error: 'Content item not found' });
@@ -73,6 +74,7 @@ router.post('/:id/messages', async (req, res) => {
       contentItem: item,
       history: priorHistory.filter((m) => m.id !== userMessage.id),
       userText: text,
+      voiceSummary: item.appProject.brandVoiceSummary,
     });
 
     const updatedItem =
