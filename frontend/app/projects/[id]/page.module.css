@@ -13,3 +13,38 @@
   color: var(--color-danger);
   font-size: 13px;
 }
+
+.voiceCard {
+  margin-top: 28px;
+  max-width: 640px;
+}
+
+.voiceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.voiceTitle {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.voiceStats {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.voiceSummary {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.voiceEmpty {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
